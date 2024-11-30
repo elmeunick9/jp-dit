@@ -1,0 +1,177 @@
+.container {
+  min-height: 100vh;
+  padding: 0 1rem;
+  background-color: #f5f5f5;
+}
+
+.main {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 4rem 0;
+}
+
+.title {
+  margin: 0;
+  line-height: 1.15;
+  font-size: 3rem;
+  text-align: center;
+  color: #333;
+  margin-bottom: 2rem;
+}
+
+.searchForm {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.searchInput {
+  flex: 1;
+  padding: 0.75rem;
+  font-size: 1rem;
+  border: 2px solid #ddd;
+  border-radius: 4px;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.searchInput:focus {
+  border-color: #0070f3;
+}
+
+.searchInput:disabled {
+  background-color: #f5f5f5;
+  cursor: not-allowed;
+}
+
+.searchButton {
+  padding: 0.75rem 1.5rem;
+  font-size: 1rem;
+  color: white;
+  background-color: #0070f3;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  min-width: 120px;
+}
+
+.searchButton:hover:not(:disabled) {
+  background-color: #0051b3;
+}
+
+.searchButton:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
+
+.results {
+  background: white;
+  border-radius: 8px;
+  padding: 1rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  min-height: 100px;
+}
+
+.resultItem {
+  padding: 1.5rem;
+  border-bottom: 1px solid #eee;
+}
+
+.resultItem:last-child {
+  border-bottom: none;
+}
+
+.wordSection {
+  margin-bottom: 0.5rem;
+}
+
+.word {
+  font-size: 1.5rem;
+  color: #333;
+  margin: 0;
+  display: inline-block;
+}
+
+.reading {
+  margin-left: 1rem;
+  color: #666;
+  font-size: 1.1rem;
+}
+
+.meaningSection {
+  margin-top: 0.5rem;
+}
+
+.partOfSpeech {
+  color: #666;
+  font-style: italic;
+  margin-bottom: 0.5rem;
+  font-size: 0.9rem;
+}
+
+.meanings {
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
+}
+
+.meanings li {
+  padding: 0.25rem 0;
+  color: #444;
+}
+
+.meanings li:before {
+  content: "•";
+  color: #0070f3;
+  margin-right: 0.5rem;
+}
+
+.error {
+  background-color: #fee;
+  border: 1px solid #fcc;
+  color: #c00;
+  padding: 1rem;
+  border-radius: 4px;
+  margin-bottom: 1rem;
+  text-align: center;
+}
+
+.noResults {
+  text-align: center;
+  color: #666;
+  padding: 2rem;
+  font-style: italic;
+}
+
+@media (max-width: 600px) {
+  .main {
+    padding: 2rem 0;
+  }
+
+  .title {
+    font-size: 2rem;
+  }
+
+  .searchForm {
+    flex-direction: column;
+  }
+
+  .searchButton {
+    width: 100%;
+  }
+
+  .resultItem {
+    padding: 1rem;
+  }
+
+  .word {
+    font-size: 1.25rem;
+  }
+
+  .reading {
+    display: block;
+    margin-left: 0;
+    margin-top: 0.25rem;
+  }
+}
