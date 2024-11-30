@@ -1,37 +1,15 @@
 import { readFileSync } from 'fs';
 import { XMLParser } from 'fast-xml-parser';
-import { DictionaryEntry } from '@/types/dictionary';
 import path from 'path';
-
-interface JMdictEntry {
-  ent_seq: string;
-  k_ele?: Array<{
-    keb: string;
-    ke_inf?: string[];
-    ke_pri?: string[];
-  }>;
-  r_ele: Array<{
-    reb: string;
-    re_nokanji?: boolean;
-    re_restr?: string[];
-    re_inf?: string[];
-    re_pri?: string[];
-  }>;
-  sense: Array<{
-    pos?: string[];
-    gloss: Array<string | { '#text': string }>;
-    field?: string[];
-    misc?: string[];
-  }>;
-}
+import { JMdictEntry, SearchResult } from '@/types/dictionary';
 
 class JMdictParser {
   private static instance: JMdictParser;
-  private entries: Map<string, DictionaryEntry[]>;
+  private entries: JMdictEntry[];
   private initialized: boolean;
 
   private constructor() {
-    this.entries = new Map();
+    this.entries = [];
     this.initialized = false;
   }
 
@@ -46,39 +24,18 @@ class JMdictParser {
     if (this.initialized) return;
 
     try {
-      const xmlData = readFileSync(path.join(process.cwd(), 'src/dict/JMdict_e'), 'utf8');
+      const dictPath = path.join(process.cwd(), 'src/dict/JMdict_e');
+      const xmlData = readFileSync(dictPath, 'utf8');
       const parser = new XMLParser({
         ignoreAttributes: false,
-        isArray: (name, jpath) => {
+        isArray: (name) => {
           const arrayElements = ['k_ele', 'r_ele', 'sense', 'gloss', 'pos', 'field', 'misc', 'ke_inf', 'ke_pri', 're_inf', 're_pri', 're_restr'];
           return arrayElements.includes(name);
         }
       });
 
       const result = parser.parse(xmlData);
-      const jmdictEntries: JMdictEntry[] = result.JMdict.entry;
-
-      for (const entry of jmdictEntries) {
-        const dictionaryEntry = this.convertToDictionaryEntry(entry);
-        
-        // Index by kanji (if available)
-        if (entry.k_ele) {
-          entry.k_ele.forEach(k => {
-            if (!this.entries.has(k.keb)) {
-              this.entries.set(k.keb, []);
-            }
-            this.entries.get(k.keb)?.push(dictionaryEntry);
-          });
-        }
-
-        // Index by reading
-        entry.r_ele.forEach(r => {
-          if (!this.entries.has(r.reb)) {
-            this.entries.set(r.reb, []);
-          }
-          this.entries.get(r.reb)?.push(dictionaryEntry);
-        });
-      }
+      this.entries = result.JMdict.entry;
 
       this.initialized = true;
     } catch (error) {
@@ -87,52 +44,96 @@ class JMdictParser {
     }
   }
 
-  private convertToDictionaryEntry(entry: JMdictEntry): DictionaryEntry {
-    const mainKanji = entry.k_ele?.[0]?.keb;
-    const mainReading = entry.r_ele[0].reb;
-    const meanings = entry.sense.map(s => {
-      const glosses = s.gloss.map(g => typeof g === 'string' ? g : g['#text']);
-      return glosses.join('; ');
-    });
-    const partOfSpeech = entry.sense[0]?.pos || [];
-
-    return {
-      word: mainKanji || mainReading,
-      reading: mainKanji ? mainReading : undefined,
-      meanings,
-      partOfSpeech: partOfSpeech.map(pos => pos.replace(/&([^;]+);/g, '$1'))
-    };
-  }
-
-  public search(query: string): DictionaryEntry[] {
+  /* Search for a word in the dictionary */
+  public search(query: string): SearchResult {
     if (!this.initialized) {
       throw new Error('JMdict parser not initialized');
     }
 
-    const results = new Set<DictionaryEntry>();
-    const normalizedQuery = query.toLowerCase();
+    const exactK: JMdictEntry[] = [];
+    const exactR: JMdictEntry[] = [];
+    const partialK: JMdictEntry[] = [];
+    const partialR: JMdictEntry[] = [];
 
-    // Direct matches
-    if (this.entries.has(query)) {
-      this.entries.get(query)?.forEach(entry => results.add(entry));
+    for (const entry of this.entries) {
+      for (const k_ele of entry.k_ele ?? []) {
+        if (k_ele.keb === query) {
+          exactK.push(entry);
+          break;
+        } else if (k_ele.keb.includes(query)) {
+          partialK.push(entry);
+          break;
+        }
+      }
+      for (const r_ele of entry.r_ele) {
+        if (r_ele.reb === query) {
+          exactR.push(entry);
+          break;
+        } else if (r_ele.reb.includes(query)) {
+          partialR.push(entry);
+          break;
+        }
+      }
     }
 
-    // Partial matches
-    this.entries.forEach((entries, key) => {
-      if (key.toLowerCase().includes(normalizedQuery)) {
-        entries.forEach(entry => results.add(entry));
-      } else {
-        entries.forEach(entry => {
-          if (entry.meanings.some(meaning => 
-            meaning.toLowerCase().includes(normalizedQuery)
-          )) {
-            results.add(entry);
-          }
-        });
-      }
-    });
+    let entry = exactK[0] || exactR[0];
+    return {
+      search: query,
+      entry,
+      similarReadings: [...exactR, ...partialR].filter((x) => x !== entry),
+      similarWritings: [...exactK, ...partialK].filter((x) => x !== entry)
+    }
+  }
 
-    return Array.from(results);
+  /** Find each word in a phrase */
+  public match(expr: string): SearchResult[] {
+    if (!this.initialized) {
+      throw new Error('JMdict parser not initialized');
+    }
+    
+    const match = this.search(expr);
+    if (match.entry) return [match];
+
+    const results: SearchResult[] = [];
+    while (expr.length > 0) {
+      const char = expr[0];
+      const match = this.search(char);
+      let found = null;
+
+      // Try to find longest match
+      if (match.similarWritings.length > 0) {
+        for (const similar of match.similarWritings) {
+          for (const k_ele of similar.k_ele ?? []) {
+            if (expr.startsWith(k_ele.keb) && (!found || k_ele.keb.length > found.length)) {
+              found = k_ele.keb;
+            }
+          }
+        }
+        if (found) {
+          const exactMatch = this.search(found);
+          results.push(exactMatch);
+          expr = expr.slice(found.length);
+        }
+
+      // Try to find exact match
+      } else if (match.entry) {
+        results.push(match);
+        expr = expr.slice(char.length);
+        found = true;
+      }
+
+      if (!found) {
+        results.push({
+          search: char,
+          entry: undefined,
+          similarReadings: [],
+          similarWritings: []
+        });
+        expr = expr.slice(1);
+      }
+    }
+
+    return results;
   }
 }
 
