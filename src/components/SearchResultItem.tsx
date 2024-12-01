@@ -2,6 +2,7 @@ import { SearchResult, JMdictEntry } from '../types/dictionary';
 import { extractKanjiReadings } from '../utils/furigana';
 import { KanjiCard } from './KanjiCard';
 import styles from '../styles/SearchResultItem.module.css';
+import { useState } from 'react';
 
 interface SearchResultItemProps {
   result: SearchResult;
@@ -22,7 +23,7 @@ export const SearchResultItem = ({ result }: SearchResultItemProps) => {
       return <div className={styles.verticalText}>{word}</div>;
     }
 
-    const kanjiReadings = extractKanjiReadings(word, readings);
+    const kanjiReadings = extractKanjiReadings(word, readings, kanjiInfo);
     let currentIndex = 0;
 
     return (
@@ -49,30 +50,54 @@ export const SearchResultItem = ({ result }: SearchResultItemProps) => {
   };
 
   const renderSimilarEntries = (entries: JMdictEntry[], title: string) => {
+    const [showAll, setShowAll] = useState(false);
+    
     if (!entries.length) return null;
-
+  
+    // Helper function to extract meaning
+    const extractMeaning = (gloss: Array<string | { '#text': string }>): string => 
+      gloss.map(g => typeof g === 'string' ? g : g['#text']).join('; ');
+  
+    // Render a single entry
+    const renderEntry = (similar: JMdictEntry, index: number) => {
+      const similarWord = similar.k_ele?.[0]?.keb || similar.r_ele[0].reb;
+      const similarReadings = similar.k_ele ? similar.r_ele.map(r => r.reb) : undefined;
+      const similarMeaning = extractMeaning(similar.sense[0].gloss);
+  
+      return (
+        <div key={index} className={styles.vocabularyItem}>
+          <span className={styles.vocabularyWord}>{similarWord}</span>
+          {similarReadings && (
+            <span className={styles.vocabularyReading}>【{similarReadings[0]}】</span>
+          )}
+          <div className={styles.vocabularyMeaning}>
+            {similarMeaning}
+          </div>
+        </div>
+      );
+    };
+  
     return (
       <div className={styles.vocabularySection}>
         <h4 className={styles.vocabularyTitle}>{title}</h4>
-        {entries.slice(0, 5).map((similar, index) => {
-          const similarWord = similar.k_ele?.[0]?.keb || similar.r_ele[0].reb;
-          const similarReadings = similar.k_ele ? similar.r_ele.map(r => r.reb) : undefined;
-          const similarMeaning = similar.sense[0].gloss.map((g: string | { '#text': string }) => 
-            typeof g === 'string' ? g : g['#text']
-          ).join('; ');
-
-          return (
-            <div key={index} className={styles.vocabularyItem}>
-              <span className={styles.vocabularyWord}>{similarWord}</span>
-              {similarReadings && (
-                <span className={styles.vocabularyReading}>【{similarReadings[0]}】</span>
-              )}
-              <div className={styles.vocabularyMeaning}>
-                {similarMeaning}
-              </div>
-            </div>
-          );
-        })}
+        
+        {/* Always show the first entry */}
+        {renderEntry(entries[0], 0)}
+        
+        {/* Show "See more" link if there are more entries */}
+        {entries.length > 1 && !showAll && (
+          <button 
+            onClick={() => setShowAll(true)} 
+            className={styles.seeMoreButton}
+          >
+            See more
+          </button>
+        )}
+        
+        {/* Show additional entries when "See more" is clicked */}
+        {showAll && entries.slice(1, 5).map((similar, index) => 
+          renderEntry(similar, index + 1)
+        )}
       </div>
     );
   };

@@ -34,6 +34,7 @@ export interface KanjiDictEntry {
 
 export interface SearchResult {
   search: string;
+  token?: any;
   entry?: JMdictEntry;
   similarReadings: JMdictEntry[];
   similarWritings: JMdictEntry[];

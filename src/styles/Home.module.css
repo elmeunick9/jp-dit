@@ -19,6 +19,13 @@
   margin-bottom: 2rem;
 }
 
+.translationTitle {
+  font-size: 0.7rem;
+  color: var(--text-color);
+  opacity: 0.7;
+  margin-bottom: 0.3rem;
+}
+
 .searchForm {
   display: flex;
   align-items: center;
@@ -83,6 +90,15 @@
   min-height: 100px;
 }
 
+.translation {
+  background: var(--card-background);
+  border-radius: 8px;
+  padding: 1rem;
+  box-shadow: 0 2px 4px var(--shadow-color);
+  min-height: 20px;
+  margin-bottom: 0.5rem;
+}
+
 .error {
   background-color: var(--error-background);
   border: 1px solid var(--error-border);
@@ -106,7 +122,7 @@
   }
   
   .main {
-    padding: 1rem 0;
+    padding: 0.2rem 0;
   }
 
   .title {

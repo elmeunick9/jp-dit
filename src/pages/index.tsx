@@ -6,6 +6,7 @@ import { dictionaryService } from '../services/dictionaryService';
 import { DictionaryState } from '../types/dictionary';
 import { SearchResultItem } from '../components/SearchResultItem';
 import { JumpToWord } from '../components/JumpToWord';
+import Translate from '@/components/translate';
 
 const Home: NextPage = () => {
   const router = useRouter();
@@ -19,6 +20,12 @@ const Home: NextPage = () => {
   // Check if JumpToWord should be shown
   const shouldShowJumpToWord = state.response && state.response.results.length > 1 && 
     state.response.results.some(result => result.entry);
+
+  const shouldShowResults = state.response && state.response.results.length > 0 &&
+    state.response.results.some(result => result.entry);
+
+  const shouldShowTranslation = state.response && state.response.results.length > 1 &&
+    state.response.results.filter(result => result.entry).length > 1;
 
   // Handle URL query parameters
   useEffect(() => {
@@ -106,8 +113,18 @@ const Home: NextPage = () => {
           </div>
         )}
 
+        { shouldShowTranslation && (
+          <div className={styles.translation}>
+            <div className={styles.translationTitle}>
+              Machine Translation
+            </div>
+            <Translate text={searchTerm} />
+          </div>
+        )}
+        
+
         <div className={styles.results}>
-          {shouldShowJumpToWord ? (
+          {shouldShowResults ? (
             <>
               {state.response!.results.map((result, index) => (
                 <div key={`${result.search}-${index}`} id={`word-${result.search}`}>

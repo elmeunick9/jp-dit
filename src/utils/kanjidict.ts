@@ -14,9 +14,20 @@ class KanjiDict {
   }
 
   public static getInstance(): KanjiDict {
+    // @ts-ignore
+    if (global.kanjiDict) {
+      console.log('KanjiDict reused');
+
+      // @ts-ignore
+      return global.kanjiDict;
+    }
+
     if (!KanjiDict.instance) {
       KanjiDict.instance = new KanjiDict();
     }
+    // @ts-ignore
+    global.kanjiDict = KanjiDict.instance;
+
     return KanjiDict.instance;
   }
 

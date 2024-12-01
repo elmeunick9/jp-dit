@@ -3,11 +3,15 @@ import { XMLParser } from 'fast-xml-parser';
 import path from 'path';
 import { JMdictEntry, SearchResult } from '../types/dictionary';
 import { kanjidict } from './kanjidict';
+import { unconjugate } from './conjugations';
+import kuromoji from 'kuromoji';
 
 class JMdictParser {
   private static instance: JMdictParser;
   private entries: JMdictEntry[];
   private initialized: boolean;
+
+  tokenizer: kuromoji.Tokenizer<kuromoji.IpadicFeatures> | null = null;
 
   private constructor() {
     this.entries = [];
@@ -15,9 +19,20 @@ class JMdictParser {
   }
 
   public static getInstance(): JMdictParser {
+      // @ts-ignore
+      if (global.jmDict) {
+        console.log('jmDict reused');
+  
+        // @ts-ignore
+        return global.jmDict;
+      }
+
     if (!JMdictParser.instance) {
       JMdictParser.instance = new JMdictParser();
     }
+
+    // @ts-ignore
+    global.jmDict = JMdictParser.instance;
     return JMdictParser.instance;
   }
 
@@ -29,7 +44,7 @@ class JMdictParser {
     if (this.initialized) return;
 
     try {
-      const dictPath = path.join(process.cwd(), 'src/dict/JMdict_e_mini');
+      const dictPath = path.join(process.cwd(), 'src/dict/JMdict_e');
       const xmlData = readFileSync(dictPath, 'utf8');
       const parser = new XMLParser({
         ignoreAttributes: false,
@@ -41,11 +56,20 @@ class JMdictParser {
 
       const result = parser.parse(xmlData);
       this.entries = result.JMdict.entry;
-      
+
       // Initialize kanjidict as well
       await kanjidict.initialize();
 
+      // Initialize tokenizer
+      this.tokenizer = await new Promise<kuromoji.Tokenizer<kuromoji.IpadicFeatures>>((resolve, reject) => {
+        kuromoji.builder({ dicPath: 'node_modules/kuromoji/dict/' }).build((err, tokenizer) => {
+          if (err) return reject(err);
+          resolve(tokenizer);
+        });
+      });
+
       this.initialized = true;
+      console.log('JMdict parser initialized');
     } catch (error) {
       console.error('Error initializing JMdict parser:', error);
       throw error;
@@ -54,7 +78,7 @@ class JMdictParser {
 
   private getKanjiInfo(word: string) {
     const kanjiInfo: { [kanji: string]: any } = {};
-    
+
     for (const char of word) {
       if (this.isKanji(char)) {
         const entry = kanjidict.search(char);
@@ -63,12 +87,12 @@ class JMdictParser {
         }
       }
     }
-    
+
     return kanjiInfo;
   }
 
   /* Search for a word in the dictionary */
-  public search(query: string): SearchResult {
+  public search(query: string, forward = false, max_results = 10): SearchResult {
     if (!this.initialized) {
       throw new Error('JMdict parser not initialized');
     }
@@ -78,12 +102,20 @@ class JMdictParser {
     const partialK: JMdictEntry[] = [];
     const partialR: JMdictEntry[] = [];
 
+    const isPartial = (str: string, sub: string): boolean => {
+      if (forward) {
+        return str.startsWith(sub);
+      } else {
+        return str.includes(sub);
+      }
+    }
+
     for (const entry of this.entries) {
       for (const k_ele of entry.k_ele ?? []) {
         if (k_ele.keb === query) {
           exactK.push(entry);
           break;
-        } else if (k_ele.keb.includes(query)) {
+        } else if (max_results > partialK.length + partialR.length && isPartial(k_ele.keb, query)) {
           partialK.push(entry);
           break;
         }
@@ -92,7 +124,7 @@ class JMdictParser {
         if (r_ele.reb === query) {
           exactR.push(entry);
           break;
-        } else if (r_ele.reb.includes(query)) {
+        } else if (max_results > partialK.length + partialR.length && isPartial(r_ele.reb, query)) {
           partialR.push(entry);
           break;
         }
@@ -100,7 +132,7 @@ class JMdictParser {
     }
 
     let entry = exactK[0] || exactR[0];
-    
+
     // Get kanji information from the search query
     const kanjiInfo = this.getKanjiInfo(query);
 
@@ -118,48 +150,72 @@ class JMdictParser {
     if (!this.initialized) {
       throw new Error('JMdict parser not initialized');
     }
-    
-    const match = this.search(expr);
-    if (match.entry) return [match];
 
+    // Tokenize the input expression
+    const tokens = this.tokenizer!.tokenize(expr);
     const results: SearchResult[] = [];
-    while (expr.length > 0) {
-      const char = expr[0];
-      const match = this.search(char);
-      let found = null;
 
-      // Try to find longest match
-      if (match.similarWritings.length > 0) {
-        for (const similar of match.similarWritings) {
-          for (const k_ele of similar.k_ele ?? []) {
-            if (expr.startsWith(k_ele.keb) && (!found || k_ele.keb.length > found.length)) {
-              found = k_ele.keb;
-            }
-          }
-        }
-        if (found) {
-          const exactMatch = this.search(found);
-          results.push(exactMatch);
-          expr = expr.slice(found.length);
-        }
+    let lastMatchedToken = null
+    let lastMatchedToken2 = null
+    for (const token of tokens) {
+      let surface = token.surface_form; // Original token text
+      const baseForm = token.basic_form || surface; // Dictionary form or original text
+      
+      // Search for the dictionary form
+      let match: SearchResult = { search: surface, entry: undefined, similarReadings: [], similarWritings: [], kanjiInfo: undefined };
+      
+      const isSingleCharNonKanji = surface.length === 1 && !this.isKanji(surface);
+      if (token.word_type === "KNOWN" && !token.conjugated_type.startsWith("特殊") && !isSingleCharNonKanji) {
+        match = this.search(surface);
 
-      // Try to find exact match
-      } else if (match.entry) {
-        results.push(match);
-        expr = expr.slice(char.length);
-        found = true;
+        if (!match.entry && surface !== baseForm) {
+          match = this.search(baseForm);
+        }
       }
 
-      if (!found) {
+      // Special case for composed words
+
+      let matched2 = false
+      if (lastMatchedToken2 && lastMatchedToken) {
+        const joinMatch2 = this.search(lastMatchedToken2.surface_form + lastMatchedToken.surface_form + surface);
+        if (joinMatch2.entry) {
+          match = joinMatch2;
+          surface = joinMatch2.search;
+          results.pop();
+          results.pop();
+          matched2 = true;
+        }
+      }
+
+      if (!matched2 && lastMatchedToken) {
+        const joinMatch = this.search(lastMatchedToken.surface_form + surface);
+
+        if (joinMatch.entry) {
+          match = joinMatch;
+          surface = joinMatch.search;
+          results.pop();
+        }
+      }
+
+      if (match.entry) {
         results.push({
-          search: char,
+          ...match,
+          token,
+          search: surface, // Include the original token
+        });
+      } else {
+        results.push({
+          search: surface,
           entry: undefined,
           similarReadings: [],
           similarWritings: [],
-          kanjiInfo: undefined
+          kanjiInfo: undefined,
+          token
         });
-        expr = expr.slice(1);
       }
+
+      lastMatchedToken2 = lastMatchedToken;
+      lastMatchedToken = token;
     }
 
     return results;

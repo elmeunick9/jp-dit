@@ -12,7 +12,7 @@
 .wordSection {
   display: flex;
   min-width: 80px;
-  justify-content: center;
+  justify-content: left;
 }
 
 .verticalTextContainer {
@@ -30,6 +30,7 @@
 }
 
 .verticalText rt {
+  margin-left: 5px;
   font-size: 0.8rem;
   color: var(--text-color);
   opacity: 0.7;
@@ -137,6 +138,25 @@
   display: none;
 }
 
+.seeMoreButton {
+  display: inline-block;
+  width: 100%;
+  margin-top: 0.5rem;
+  padding: 0.5rem;
+  background-color: var(--card-background);
+  color: white;
+  border: none;
+  border-radius: calc(var(--border-radius) / 2);
+  border: 1px solid var(--border-color);
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.seeMoreButton:hover {
+  background-color: var(--background-color);
+  cursor: pointer;
+}
+
 @media (max-width: 600px) {
   .resultItem {
     padding: 0.75rem 0.25rem;
@@ -144,7 +164,7 @@
   }
 
   .wordSection {
-    min-width: 40px;
+    min-width: 50px;
   }
 
   .verticalText {
@@ -153,6 +173,7 @@
 
   .verticalText rt {
     font-size: 0.8rem;
+    margin-left: 5px;
   }
 
   .meaningSection {
