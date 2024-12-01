@@ -101,9 +101,6 @@ const Home: NextPage = () => {
         <div className={styles.results}>
           {state.results.length > 0 ? (
             <>
-              <div className={styles.resultCount}>
-                Found {state.results.length} result{state.results.length !== 1 ? 's' : ''}
-              </div>
               {state.results.map((result, index) => (
                 <SearchResultItem key={`${result.search}-${index}`} result={result} />
               ))}

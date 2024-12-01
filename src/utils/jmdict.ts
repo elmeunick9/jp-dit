@@ -24,7 +24,7 @@ class JMdictParser {
     if (this.initialized) return;
 
     try {
-      const dictPath = path.join(process.cwd(), 'src/dict/JMdict_e');
+      const dictPath = path.join(process.cwd(), 'src/dict/JMdict_e_mini');
       const xmlData = readFileSync(dictPath, 'utf8');
       const parser = new XMLParser({
         ignoreAttributes: false,
