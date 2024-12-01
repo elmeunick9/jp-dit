@@ -5,15 +5,20 @@ import styles from '../styles/Home.module.css';
 import { dictionaryService } from '../services/dictionaryService';
 import { DictionaryState } from '../types/dictionary';
 import { SearchResultItem } from '../components/SearchResultItem';
+import { JumpToWord } from '../components/JumpToWord';
 
 const Home: NextPage = () => {
   const router = useRouter();
   const [searchTerm, setSearchTerm] = useState('');
   const [state, setState] = useState<DictionaryState>({
-    results: [],
+    response: undefined,
     loading: false,
     error: null
   });
+
+  // Check if JumpToWord should be shown
+  const shouldShowJumpToWord = state.response && state.response.results.length > 1 && 
+    state.response.results.some(result => result.entry);
 
   // Handle URL query parameters
   useEffect(() => {
@@ -29,8 +34,8 @@ const Home: NextPage = () => {
 
     try {
       setState(prev => ({ ...prev, loading: true, error: null }));
-      const results = await dictionaryService.searchWord(term);
-      setState(prev => ({ ...prev, results }));
+      const response = await dictionaryService.searchWord(term);
+      setState(prev => ({ ...prev, response }));
     } catch (error) {
       setState(prev => ({
         ...prev,
@@ -74,11 +79,7 @@ const Home: NextPage = () => {
 
   return (
     <div className={styles.container}>
-      <main className={styles.main}>
-        {/* <h1 className={styles.title}>
-          Japanese-English Dictionary
-        </h1> */}
-
+      <main className={`${styles.main} ${shouldShowJumpToWord ? styles.mainWithJumpToWord : ''}`}>
         <form onSubmit={handleSearch} className={styles.searchForm}>
           <input
             type="text"
@@ -93,8 +94,9 @@ const Home: NextPage = () => {
             type="submit" 
             className={styles.searchButton}
             disabled={state.loading || !searchTerm.trim()}
+            aria-label="Search"
           >
-            {state.loading ? 'Searching...' : 'Search'}
+            {state.loading ? '⏳' : '🔍'}
           </button>
         </form>
 
@@ -105,10 +107,12 @@ const Home: NextPage = () => {
         )}
 
         <div className={styles.results}>
-          {state.results.length > 0 ? (
+          {shouldShowJumpToWord ? (
             <>
-              {state.results.map((result, index) => (
-                <SearchResultItem key={`${result.search}-${index}`} result={result} />
+              {state.response!.results.map((result, index) => (
+                <div key={`${result.search}-${index}`} id={`word-${result.search}`}>
+                  <SearchResultItem result={result} />
+                </div>
               ))}
             </>
           ) : (
@@ -120,6 +124,7 @@ const Home: NextPage = () => {
           )}
         </div>
       </main>
+      {shouldShowJumpToWord && <JumpToWord results={state.response!.results} />}
     </div>
   );
 };

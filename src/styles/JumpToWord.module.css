@@ -1,0 +1,56 @@
+.jumpContainer {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: var(--background-color);
+  border-top: 1px solid var(--border-color);
+  padding: 0.75rem;
+  z-index: 1000;
+  box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.jumpContent {
+  max-width: 1200px;
+  margin: 0 auto;
+  text-align: center;
+  line-height: 1.6;
+}
+
+.wordLink {
+  color: var(--text-color);
+  text-decoration: none;
+  transition: all 0.2s ease;
+  display: inline-block;
+  margin: 0 0.25rem;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  border: 1px solid var(--border-color);
+}
+
+.wordLink:hover {
+  color: var(--text-color);
+  background: var(--card-background);
+}
+
+.wordText {
+  color: var(--text-color);
+  display: inline-block;
+  margin: 0 0.25rem;
+  padding: 0.25rem 0.5rem;
+}
+
+@media (max-width: 768px) {
+  .jumpContainer {
+    padding: 0.5rem;
+  }
+  
+  .wordLink, .wordText {
+    margin: 0 0.15rem;
+    padding: 0.15rem 0.3rem;
+  }
+}
+
+.marginBlank {
+  height: 2.5rem;
+}

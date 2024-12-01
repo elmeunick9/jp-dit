@@ -1,5 +1,5 @@
 import * as wanakana from 'wanakana';
-import { SearchResult } from '@/types/dictionary';
+import { SearchResponse, SearchResult } from '@/types/dictionary';
 
 class DictionaryService {
   private static instance: DictionaryService;
@@ -13,7 +13,7 @@ class DictionaryService {
     return DictionaryService.instance;
   }
 
-  public async searchWord(query: string): Promise<SearchResult[]> {
+  public async searchWord(query: string): Promise<SearchResponse> {
     try {
       const response = await fetch(`/api/dictionary/search?q=${encodeURIComponent(query)}`);
       if (!response.ok) {

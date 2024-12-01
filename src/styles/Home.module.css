@@ -21,13 +21,15 @@
 
 .searchForm {
   display: flex;
-  gap: 1rem;
+  align-items: center;
   margin-bottom: 2rem;
+  position: relative;
 }
 
 .searchInput {
-  flex: 1;
+  width: 100%;
   padding: 0.75rem;
+  padding-right: 3rem;
   font-size: 1rem;
   border: 2px solid var(--border-color);
   border-radius: 4px;
@@ -47,24 +49,30 @@
 }
 
 .searchButton {
-  padding: 0.75rem 1.5rem;
-  font-size: 1rem;
-  color: white;
-  background-color: var(--primary-color);
+  position: absolute;
+  right: 0.75rem;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
   border: none;
-  border-radius: 4px;
+  font-size: 1.5rem;
   cursor: pointer;
-  transition: background-color 0.2s;
-  min-width: 120px;
+  color: var(--text-color);
+  opacity: 0.7;
+  transition: opacity 0.2s;
+  padding: 0.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .searchButton:hover:not(:disabled) {
-  background-color: var(--primary-hover);
+  opacity: 1;
 }
 
 .searchButton:disabled {
-  background-color: var(--border-color);
   cursor: not-allowed;
+  opacity: 0.5;
 }
 
 .results {
@@ -94,7 +102,7 @@
 
 @media (max-width: 600px) {
   .container {
-    padding: 0 0.2rem;
+    padding: 0 0.3rem;
   }
   
   .main {
@@ -107,13 +115,18 @@
   }
 
   .searchForm {
-    flex-direction: column;
-    gap: 0.5rem;
-    margin-bottom: 1rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .searchInput {
+    padding: 0.6rem;
+    padding-right: 2.5rem;
+    font-size: 0.95rem;
   }
 
   .searchButton {
-    width: 100%;
+    right: 0.5rem;
+    font-size: 1.3rem;
   }
 
   .results {

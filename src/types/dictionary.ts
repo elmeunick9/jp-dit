@@ -40,8 +40,13 @@ export interface SearchResult {
   kanjiInfo?: { [kanji: string]: KanjiDictEntry };
 }
 
-export interface DictionaryState {
+export interface SearchResponse {
   results: SearchResult[];
+  time: number; // in ms
+}
+
+export interface DictionaryState {
+  response?: SearchResponse;
   loading: boolean;
   error: string | null;
 }
