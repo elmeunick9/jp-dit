@@ -1,5 +1,6 @@
 import { SearchResult, JMdictEntry } from '../types/dictionary';
 import { extractKanjiReadings } from '../utils/furigana';
+import { KanjiCard } from './KanjiCard';
 import styles from '../styles/SearchResultItem.module.css';
 
 interface SearchResultItemProps {
@@ -9,7 +10,7 @@ interface SearchResultItemProps {
 export const SearchResultItem = ({ result }: SearchResultItemProps) => {
   if (!result.entry) return null;
 
-  const { entry, search } = result;
+  const { entry, search, kanjiInfo } = result;
   const readings = entry.k_ele ? entry.r_ele.map(r => r.reb) : undefined;
   const meanings = entry.sense.map(s => s.gloss.map((g: string | { '#text': string }) => 
     typeof g === 'string' ? g : g['#text']
@@ -76,6 +77,43 @@ export const SearchResultItem = ({ result }: SearchResultItemProps) => {
     );
   };
 
+  const renderKanjiSection = () => {
+    if (!kanjiInfo || Object.keys(kanjiInfo).length === 0) return null;
+
+    return (
+      <>
+        {/* Desktop version - full kanji cards */}
+        <div className={styles.kanjiSectionDesktop}>
+          <h4 className={styles.kanjiTitle}>Kanji Information</h4>
+          <div className={styles.kanjiList}>
+            {Object.entries(kanjiInfo).map(([kanji, info]) => (
+              <KanjiCard 
+                key={kanji}
+                kanji={kanji}
+                info={info}
+              />
+            ))}
+          </div>
+        </div>
+
+        {/* Mobile version - mini kanji cards */}
+        <div className={styles.kanjiSectionMobile}>
+          <h4 className={styles.kanjiTitle}>Kanji Information</h4>
+          <div className={styles.miniKanjiList}>
+            {Object.entries(kanjiInfo).map(([kanji, info]) => (
+              <KanjiCard 
+                key={kanji}
+                kanji={kanji}
+                info={info}
+                mini={true}
+              />
+            ))}
+          </div>
+        </div>
+      </>
+    );
+  };
+
   return (
     <div className={styles.resultItem}>
       <div className={styles.wordSection}>
@@ -96,6 +134,7 @@ export const SearchResultItem = ({ result }: SearchResultItemProps) => {
             ))}
           </ul>
         </div>
+        {renderKanjiSection()}
         {renderSimilarEntries(result.similarReadings, 'Similar Readings')}
         {renderSimilarEntries(result.similarWritings, 'Similar Writings')}
       </div>

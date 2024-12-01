@@ -1,7 +1,7 @@
 .container {
   min-height: 100vh;
   padding: 0 1rem;
-  background-color: #f5f5f5;
+  background-color: var(--background-color);
 }
 
 .main {
@@ -15,7 +15,7 @@
   line-height: 1.15;
   font-size: 3rem;
   text-align: center;
-  color: #333;
+  color: var(--text-color);
   margin-bottom: 2rem;
 }
 
@@ -29,18 +29,20 @@
   flex: 1;
   padding: 0.75rem;
   font-size: 1rem;
-  border: 2px solid #ddd;
+  border: 2px solid var(--border-color);
   border-radius: 4px;
   outline: none;
   transition: border-color 0.2s;
+  background-color: var(--card-background);
+  color: var(--text-color);
 }
 
 .searchInput:focus {
-  border-color: #0070f3;
+  border-color: var(--primary-color);
 }
 
 .searchInput:disabled {
-  background-color: #f5f5f5;
+  background-color: var(--background-color);
   cursor: not-allowed;
 }
 
@@ -48,7 +50,7 @@
   padding: 0.75rem 1.5rem;
   font-size: 1rem;
   color: white;
-  background-color: #0070f3;
+  background-color: var(--primary-color);
   border: none;
   border-radius: 4px;
   cursor: pointer;
@@ -57,26 +59,26 @@
 }
 
 .searchButton:hover:not(:disabled) {
-  background-color: #0051b3;
+  background-color: var(--primary-hover);
 }
 
 .searchButton:disabled {
-  background-color: #ccc;
+  background-color: var(--border-color);
   cursor: not-allowed;
 }
 
 .results {
-  background: white;
+  background: var(--card-background);
   border-radius: 8px;
   padding: 1rem;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 4px var(--shadow-color);
   min-height: 100px;
 }
 
 .error {
-  background-color: #fee;
-  border: 1px solid #fcc;
-  color: #c00;
+  background-color: var(--error-background);
+  border: 1px solid var(--error-border);
+  color: var(--error-text);
   padding: 1rem;
   border-radius: 4px;
   margin-bottom: 1rem;
@@ -85,25 +87,36 @@
 
 .noResults {
   text-align: center;
-  color: #666;
+  color: var(--text-color);
   padding: 2rem;
   font-style: italic;
 }
 
 @media (max-width: 600px) {
+  .container {
+    padding: 0 0.2rem;
+  }
+  
   .main {
-    padding: 2rem 0;
+    padding: 1rem 0;
   }
 
   .title {
     font-size: 2rem;
+    margin-bottom: 1rem;
   }
 
   .searchForm {
     flex-direction: column;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
   }
 
   .searchButton {
     width: 100%;
+  }
+
+  .results {
+    padding: 0.5rem;
   }
 }

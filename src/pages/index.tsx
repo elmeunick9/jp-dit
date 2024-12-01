@@ -45,10 +45,11 @@ const Home: NextPage = () => {
     e.preventDefault();
     if (!searchTerm.trim()) return;
 
-    // Update URL with search term
+    // Update URL with search term while preserving theme
+    const query = { ...router.query, q: searchTerm };
     router.push({
       pathname: '/',
-      query: { q: searchTerm }
+      query
     }, undefined, { shallow: true });
 
     await performSearch(searchTerm);
@@ -61,17 +62,22 @@ const Home: NextPage = () => {
     // Clear results if input is empty
     if (!value.trim()) {
       setState(prev => ({ ...prev, results: [], error: null }));
-      // Remove query parameter when search is cleared
-      router.push('/', undefined, { shallow: true });
+      // Remove search query while preserving theme
+      const { theme } = router.query;
+      const query = theme ? { theme } : {};
+      router.push({
+        pathname: '/',
+        query
+      }, undefined, { shallow: true });
     }
   }, [router]);
 
   return (
     <div className={styles.container}>
       <main className={styles.main}>
-        <h1 className={styles.title}>
+        {/* <h1 className={styles.title}>
           Japanese-English Dictionary
-        </h1>
+        </h1> */}
 
         <form onSubmit={handleSearch} className={styles.searchForm}>
           <input

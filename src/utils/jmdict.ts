@@ -1,7 +1,8 @@
 import { readFileSync } from 'fs';
 import { XMLParser } from 'fast-xml-parser';
 import path from 'path';
-import { JMdictEntry, SearchResult } from '@/types/dictionary';
+import { JMdictEntry, SearchResult } from '../types/dictionary';
+import { kanjidict } from './kanjidict';
 
 class JMdictParser {
   private static instance: JMdictParser;
@@ -20,6 +21,10 @@ class JMdictParser {
     return JMdictParser.instance;
   }
 
+  private isKanji(char: string): boolean {
+    return char >= '\u4e00' && char <= '\u9faf';
+  }
+
   public async initialize(): Promise<void> {
     if (this.initialized) return;
 
@@ -36,12 +41,30 @@ class JMdictParser {
 
       const result = parser.parse(xmlData);
       this.entries = result.JMdict.entry;
+      
+      // Initialize kanjidict as well
+      await kanjidict.initialize();
 
       this.initialized = true;
     } catch (error) {
       console.error('Error initializing JMdict parser:', error);
       throw error;
     }
+  }
+
+  private getKanjiInfo(word: string) {
+    const kanjiInfo: { [kanji: string]: any } = {};
+    
+    for (const char of word) {
+      if (this.isKanji(char)) {
+        const entry = kanjidict.search(char);
+        if (entry) {
+          kanjiInfo[char] = entry;
+        }
+      }
+    }
+    
+    return kanjiInfo;
   }
 
   /* Search for a word in the dictionary */
@@ -77,12 +100,17 @@ class JMdictParser {
     }
 
     let entry = exactK[0] || exactR[0];
+    
+    // Get kanji information from the search query
+    const kanjiInfo = this.getKanjiInfo(query);
+
     return {
       search: query,
       entry,
       similarReadings: [...exactR, ...partialR].filter((x) => x !== entry),
-      similarWritings: [...exactK, ...partialK].filter((x) => x !== entry)
-    }
+      similarWritings: [...exactK, ...partialK].filter((x) => x !== entry),
+      kanjiInfo
+    };
   }
 
   /** Find each word in a phrase */
@@ -127,7 +155,8 @@ class JMdictParser {
           search: char,
           entry: undefined,
           similarReadings: [],
-          similarWritings: []
+          similarWritings: [],
+          kanjiInfo: undefined
         });
         expr = expr.slice(1);
       }
