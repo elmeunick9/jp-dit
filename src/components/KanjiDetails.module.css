@@ -129,3 +129,36 @@
     font-size: 0.9rem;
   }
   
+  .kanjiSectionDesktop, .kanjiSectionMobile {
+    margin-top: 1.5rem;
+    border-top: 1px solid var(--border-color);
+    padding-top: 1rem;
+  }
+  
+  .kanjiTitle {
+    font-size: 1rem;
+    color: var(--text-color);
+    opacity: 0.7;
+    margin-bottom: 1rem;
+  }
+
+  .miniKanjiList {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  
+  .meanings {
+    margin-bottom: 1.5rem;
+    font-size: 1rem;
+    color: var(--text-color);
+  }
+  
+  .meanings strong {
+    display: block;
+    margin-bottom: 0.3rem;
+    font-size: 0.9rem;
+    color: var(--text-color);
+    opacity: 0.7;
+  }
+  

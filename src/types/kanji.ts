@@ -1,8 +1,7 @@
-export interface KanjiDetail {
-    kanji: string;
-    onyomi: string[];
-    kunyomi: string[];
-    similarKanji: string[];
-    mnemonic: string;
-  }
-  
+// KanjiDetail.ts
+import { KanjiDictEntry } from '../types/dictionary';
+
+export interface KanjiDetail extends KanjiDictEntry {
+  mnemonic: string;
+  relatedKanji: KanjiDictEntry[];
+}

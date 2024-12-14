@@ -8,9 +8,15 @@ interface KanjiCardProps {
 }
 
 export const KanjiCard = ({ kanji, info, mini = false }: KanjiCardProps) => {
+  const handleClick = () => {
+    const themeMatch = new URLSearchParams(window.location.search).get('theme');
+    const newUrl = `http://localhost:3000/${encodeURIComponent(kanji)}?theme=${themeMatch || 'dark'}`;
+    window.location.href = newUrl; // Redirect to the constructed URL
+  };
+
   if (mini) {
     return (
-      <div className={styles.miniCard}>
+      <div className={styles.miniCard} onClick={handleClick}>
         <span className={styles.miniKanji}>{kanji}</span>
         <span className={styles.miniMeanings}>
           {info.meanings.slice(0, 2).join(', ')}
@@ -20,7 +26,7 @@ export const KanjiCard = ({ kanji, info, mini = false }: KanjiCardProps) => {
   }
 
   return (
-    <div className={styles.card}>
+    <div className={styles.card} onClick={handleClick}>
       <div className={styles.character}>{kanji}</div>
       {info.readings.onYomi.length > 0 && (
         <div className={styles.readings}>

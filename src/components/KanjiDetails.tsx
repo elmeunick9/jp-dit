@@ -1,22 +1,16 @@
+// File: components/KanjiDetails.tsx
+
 import React, { useState } from "react";
+import { KanjiDetail } from "../types/kanji";
+import { KanjiCard } from "./KanjiCard";
 import styles from "./KanjiDetails.module.css";
 
 interface KanjiDetailsProps {
-  kanji: string;
-  onyomi: string[];
-  kunyomi: string[];
-  similarKanji: string[];
-  mnemonic: string;
+  kanjiData: KanjiDetail;
 }
 
-const KanjiDetails: React.FC<KanjiDetailsProps> = ({
-  kanji,
-  onyomi,
-  kunyomi,
-  similarKanji,
-  mnemonic: initialMnemonic,
-}) => {
-  const [mnemonic, setMnemonic] = useState(initialMnemonic);
+const KanjiDetails: React.FC<KanjiDetailsProps> = ({ kanjiData }) => {
+  const [mnemonic, setMnemonic] = useState(kanjiData.mnemonic);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
@@ -30,7 +24,7 @@ const KanjiDetails: React.FC<KanjiDetailsProps> = ({
       const response = await fetch("/api/save-mnemonic", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ kanji, mnemonic }),
+        body: JSON.stringify({ kanji: kanjiData.literal, mnemonic }),
       });
 
       if (!response.ok) {
@@ -47,19 +41,30 @@ const KanjiDetails: React.FC<KanjiDetailsProps> = ({
 
   return (
     <div className={styles.container}>
-      <h1 className={styles.kanji}>{kanji}</h1>
+      <h1 className={styles.kanji}>{kanjiData.literal}</h1>
 
+      <div className={styles.meanings}>
+        <strong>Meanings:</strong> {kanjiData.meanings.join(", ")}
+      </div>
       <div className={styles.readings}>
-        <strong>Onyomi:</strong> {onyomi.join(", ")}
-        <strong>Kunyomi:</strong> {kunyomi.join(", ")}
+        <strong>Onyomi:</strong> {kanjiData.readings.onYomi.join(", ")}
+        <strong>Kunyomi:</strong> {kanjiData.readings.kunYomi.join(", ")}
       </div>
 
-      <div className={styles.similarKanji}>
-        <strong>Similar Kanji:</strong> {similarKanji.length > 0 ? similarKanji.join(", ") : "None"}
-      </div>
 
-      <div className={styles.mnemonic}>
-        <strong>Mnemonic:</strong>
+      { kanjiData.relatedKanji.length > 0 && (
+        <div className={styles.kanjiSectionMobile}>
+        <h4 className={styles.kanjiTitle}>Related Kanji:</h4>
+        <div className={styles.miniKanjiList}>
+          {kanjiData.relatedKanji.map((relatedKanji) => (
+            <KanjiCard mini key={relatedKanji.literal} kanji={relatedKanji.literal} info={relatedKanji} />
+          ))}
+        </div>
+      </div>
+      )}
+      
+      <div className={styles.kanjiSectionMobile}>
+        <h4 className={styles.kanjiTitle}>Mnemonic:</h4>
         <textarea
           className={styles.mnemonicInput}
           value={mnemonic}
