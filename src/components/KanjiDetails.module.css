@@ -1,0 +1,131 @@
+.container {
+    margin: 5px;
+}
+
+.kanjiDetails {
+    max-width: 800px; /* Matching .main in your styles */
+    margin: 0 auto;
+    padding: 4rem 1rem; /* Consistent padding with .main */
+    background: var(--card-background);
+    border-radius: 8px; /* Rounded corners for a card look */
+    box-shadow: 0 2px 4px var(--shadow-color);
+  }
+  
+  .kanji {
+    font-size: 3rem; /* Aligns with .title font size */
+    line-height: 1.15;
+    text-align: center;
+    color: var(--text-color);
+    margin: 0.5rem 0 2rem; /* Matches .title spacing */
+  }
+  
+  .readings, 
+  .similarKanji, 
+  .mnemonic {
+    margin-bottom: 1.5rem; /* Consistent spacing between sections */
+    font-size: 1rem; /* Base font size for readability */
+    color: var(--text-color);
+  }
+  
+  .readings strong,
+  .similarKanji strong,
+  .mnemonic strong {
+    display: block;
+    margin-bottom: 0.3rem;
+    font-size: 0.9rem;
+    color: var(--text-color);
+    opacity: 0.7;
+  }
+  
+  textarea.mnemonicInput {
+    width: 100%;
+    padding: 0.75rem;
+    font-size: 1rem;
+    border: 2px solid var(--border-color);
+    border-radius: 4px;
+    outline: none;
+    background: var(--background-color);
+    color: var(--text-color);
+    transition: border-color 0.2s, background-color 0.2s;
+    resize: none;
+  }
+  
+  textarea.mnemonicInput:focus {
+    border-color: var(--primary-color);
+  }
+  
+  textarea.mnemonicInput:disabled {
+    background-color: var(--background-color);
+    cursor: not-allowed;
+    opacity: 0.5;
+  }
+  
+  @media (max-width: 600px) {
+    .kanjiDetails {
+      padding: 1rem; /* Compact padding for smaller screens */
+    }
+  
+    .kanji {
+      font-size: 2rem; /* Slightly smaller for mobile */
+      margin-bottom: 1rem;
+    }
+  
+    .readings,
+    .similarKanji,
+    .mnemonic {
+      margin-bottom: 1rem; /* Adjust spacing for mobile */
+    }
+  
+    textarea.mnemonicInput {
+      padding: 0.6rem;
+      font-size: 0.9rem;
+    }
+  }
+  
+  .mnemonicButtons {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 0.6rem;
+  }
+
+  .saveButton {
+    display: inline-block;
+    margin: 0 auto; /* Centers the button */
+    padding: 0.4rem 0.8rem; /* Smaller padding */
+    background-color: var(--card-background);
+    color: var(--text-color);
+    border: 1px solid var(--border-color);
+    border-radius: calc(var(--border-radius) / 2);
+    font-size: 0.8rem; /* Smaller font size */
+    font-weight: 500;
+    cursor: pointer;
+    opacity: 0.8; /* Greyed out appearance */
+    transition: background-color 0.2s, opacity 0.2s;
+  }
+  
+  .saveButton:hover {
+    background-color: var(--secondary-color);
+    color: white;
+    opacity: 1;
+  }
+  
+  .saveButton:disabled {
+    cursor: not-allowed;
+    background-color: var(--background-color);
+    color: var(--text-color);
+    opacity: 0.5;
+  }
+  
+  
+  .success {
+    margin-top: 0.5rem;
+    color: var(--primary-color);
+    font-size: 0.9rem;
+  }
+  
+  .error {
+    margin-top: 0.5rem;
+    color: var(--error-text);
+    font-size: 0.9rem;
+  }
+  
