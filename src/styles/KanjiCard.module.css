@@ -55,6 +55,16 @@
   color: var(--text-color);
 }
 
+.miniKanjiImg {
+  height: 26px;
+}
+
+.miniKanjiImgDark {
+  mix-blend-mode: color-dodge;
+  filter: invert(1);
+  height: 26px;
+}
+
 .miniMeanings {
   color: var(--text-color);
   font-size: 1rem;

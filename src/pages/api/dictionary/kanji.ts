@@ -2,9 +2,10 @@ import fs from 'fs';
 import path from 'path';
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { kanjidict } from '../../../utils/kanjidict';
-import { KanjiDetail } from '@/types/kanji';
+import { KanjiDamageEntry, KanjiDetail } from '@/types/kanji';
 
 const filePath = path.join(process.cwd(), 'mnemonics.json');
+const kanjiDamageFilePath = path.join(process.cwd(), 'src/dict/kanjidamage.json');
 
 export default async function handler(
   req: NextApiRequest,
@@ -30,11 +31,22 @@ export default async function handler(
     }
     
     const mnemonics = JSON.parse(fs.readFileSync(filePath, 'utf-8'));
+    const kanjiDamage = JSON.parse(fs.readFileSync(kanjiDamageFilePath, 'utf-8'));
+    const kdEntry: KanjiDamageEntry|undefined = kanjiDamage[entry.literal];
+    const components = kdEntry?.components || [];
+
+    console.log(kdEntry)
 
     res.status(200).json({
         ...entry,
-        relatedKanji: [],
-        mnemonic: mnemonics[entry.literal],
+        relatedKanji: [
+            ...components.map((c) => ({
+                literal: c.literal,
+                meanings: c.meaning?.split(', ') || [],
+                readings: { onYomi: [], kunYomi: [] },
+            })),
+        ],
+        mnemonic: mnemonics[entry.literal]?.trim() || kanjiDamage[entry.literal]?.mnemonic,
     });
   } catch (error) {
     console.error('Search error:', error);

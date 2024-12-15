@@ -7,6 +7,7 @@ import { DictionaryState } from '../types/dictionary';
 import { SearchResultItem } from '../components/SearchResultItem';
 import { JumpToWord } from '../components/JumpToWord';
 import Translate from '@/components/translate';
+import Explain from '@/components/explain';
 
 const Home: NextPage = () => {
   const router = useRouter();
@@ -26,6 +27,8 @@ const Home: NextPage = () => {
 
   const shouldShowTranslation = state.response && state.response.results.length > 1 &&
     state.response.results.filter(result => result.entry).length > 1;
+
+  const [shouldShowExplanation, setShouldShowExplanation] = useState(false);
 
   // Handle URL query parameters
   useEffect(() => {
@@ -119,9 +122,21 @@ const Home: NextPage = () => {
               Machine Translation
             </div>
             <Translate text={searchTerm} />
+            { !shouldShowExplanation && (
+              <div className={styles.explainLink} onClick={() => setShouldShowExplanation(!shouldShowExplanation)}>
+                Explain
+              </div>
+            )}
+            { shouldShowExplanation && (
+              <>
+              <div className={styles.explanationTitle}>
+                Explanation
+              </div>
+              <Explain text={searchTerm} />
+              </>
+            )}
           </div>
         )}
-        
 
         <div className={styles.results}>
           {shouldShowResults ? (

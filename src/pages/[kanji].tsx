@@ -34,7 +34,10 @@ const KanjiDetailPage: React.FC = () => {
     return <p>Kanji not found</p>;
   }
 
-  return <KanjiDetails kanjiData={kanjiData} />;
+  return <>
+    { /* <a href={`http://www.kanjidamage.com/kanji/search?utf8=✓&q=${kanji}`}>KanjiDamage</a> */ }
+    <KanjiDetails kanjiData={kanjiData} />
+  </>;
 };
 
 export default KanjiDetailPage;

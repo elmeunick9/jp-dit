@@ -23,7 +23,7 @@ export interface JMdictEntry {
 export interface KanjiDictEntry {
   literal: string;
   grade?: number;
-  strokeCount: number;
+  strokeCount?: number;
   jlpt?: number;
   readings: {
     onYomi: string[];
