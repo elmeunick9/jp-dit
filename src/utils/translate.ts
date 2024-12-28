@@ -27,11 +27,11 @@ export async function translateText(text: string): Promise<string> {
         "Content-Type": "application/json"
       },
       body: JSON.stringify({
-        "model": "meta-llama/llama-3.2-1b-instruct:free",
+        "model": "meta-llama/llama-3.2-3b-instruct:free",
         "messages": [
           {
             "role": "user",
-            "content": `I'm an intermediate level japanese student. Please explain the meaning of the following text. Provide a short and clear explanation. ${text}`
+            "content": `I'm an intermediate level japanese student. Please explain the meaning of the following text. Provide a short and clear explanation of every part of the sentence, including word meanings and pronunciations. ${text}`
           }
         ]
       })
@@ -39,7 +39,7 @@ export async function translateText(text: string): Promise<string> {
   
     if (!response.ok) {
       console.error(JSON.stringify(response));
-      throw new Error('Failed to fetch explanation');
+      throw new Error('Failed to fetch explanation, response: ' + JSON.stringify(response));
     }
   
     const data = await response.json();

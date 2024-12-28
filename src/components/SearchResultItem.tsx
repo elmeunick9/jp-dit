@@ -24,11 +24,13 @@ export const SearchResultItem = ({ result }: SearchResultItemProps) => {
     }
 
     const kanjiReadings = extractKanjiReadings(word, readings, kanjiInfo);
+    const hasMissingReadings = kanjiReadings.some(kr => kr.readings.length === 0);
+    console.log(hasMissingReadings);
     let currentIndex = 0;
 
     return (
       <div className={styles.verticalText}>
-        {word.split('').map((char, index) => {
+        { !hasMissingReadings ? word.split('').map((char, index) => {
           const kanjiReading = kanjiReadings.find(kr => 
             kr.kanji === char && index >= currentIndex
           );
@@ -44,7 +46,7 @@ export const SearchResultItem = ({ result }: SearchResultItemProps) => {
           }
 
           return char;
-        })}
+        }) : <ruby>{word}<rt>{readings[0]}</rt></ruby>}
       </div>
     );
   };

@@ -25,10 +25,11 @@ const Home: NextPage = () => {
   const shouldShowResults = state.response && state.response.results.length > 0 &&
     state.response.results.some(result => result.entry);
 
-  const shouldShowTranslation = state.response && state.response.results.length > 1 &&
-    state.response.results.filter(result => result.entry).length > 1;
+  const shouldShowTranslation = (state.response && state.response.results.length > 1 &&
+    state.response.results.filter(result => result.entry).length > 1) || !shouldShowResults;
 
   const [shouldShowExplanation, setShouldShowExplanation] = useState(false);
+  const kanjiCharacters = searchTerm.split('').filter(char => char.length === 1 && char.match(/[\u4e00-\u9fa5]/));
 
   // Handle URL query parameters
   useEffect(() => {
@@ -121,7 +122,7 @@ const Home: NextPage = () => {
             <div className={styles.translationTitle}>
               Machine Translation
             </div>
-            <Translate text={searchTerm} />
+            <Translate text={searchTerm} key={searchTerm} />
             { !shouldShowExplanation && (
               <div className={styles.explainLink} onClick={() => setShouldShowExplanation(!shouldShowExplanation)}>
                 Explain
@@ -150,7 +151,12 @@ const Home: NextPage = () => {
           ) : (
             searchTerm && !state.loading && (
               <div className={styles.noResults}>
-                No results found for "{searchTerm}"
+                No results found for "{searchTerm}". <br />
+                {kanjiCharacters.map((kanji, index) => (
+                  <div key={index}>
+                    Search instead by <a href={`/${kanji}?theme=${router.query.theme}`}>"{kanji}"</a>.
+                  </div>
+                ))}
               </div>
             )
           )}
