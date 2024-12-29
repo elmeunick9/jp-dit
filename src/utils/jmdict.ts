@@ -181,8 +181,13 @@ class JMdictParser {
         if (joinMatch2.entry) {
           match = joinMatch2;
           surface = joinMatch2.search;
-          results.pop();
-          results.pop();
+          console.log("AT MATCH 2:", results.at(-1), results.at(-2));
+          if (lastMatchedToken2.surface_form + lastMatchedToken.surface_form === `${results.at(-1)?.search}${results.at(-2)?.search}`) {
+            results.pop();
+            results.pop();
+          } else {
+            results.pop();
+          }
           matched2 = true;
         }
       }

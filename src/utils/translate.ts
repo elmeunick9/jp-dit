@@ -18,7 +18,8 @@ export async function translateText(text: string): Promise<string> {
   }
   
   export async function explainText(text: string): Promise<string> {
-    const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY || "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"
+    console.log(process.env.NEXT_PUBLIC_OPENROUTER_API_KEY);
+    const OPENROUTER_API_KEY = process.env.NEXT_PUBLIC_OPENROUTER_API_KEY || "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"
 
     const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
       method: "POST",
@@ -27,7 +28,7 @@ export async function translateText(text: string): Promise<string> {
         "Content-Type": "application/json"
       },
       body: JSON.stringify({
-        "model": "meta-llama/llama-3.2-3b-instruct:free",
+        "model": "deepseek/deepseek-chat",
         "messages": [
           {
             "role": "user",

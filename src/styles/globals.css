@@ -38,7 +38,8 @@
 }
 
 html,
-body {
+body, p, ruby, rb {
+  zoom: 1.2;
   max-width: 100vw;
   overflow-x: hidden;
   font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Oxygen,

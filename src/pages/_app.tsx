@@ -2,6 +2,7 @@ import type { AppProps } from 'next/app';
 import { useRouter } from 'next/router';
 import { useEffect } from 'react';
 import '../styles/globals.css';
+import Head from 'next/head';
 
 function MyApp({ Component, pageProps }: AppProps) {
   const router = useRouter();
@@ -18,7 +19,12 @@ function MyApp({ Component, pageProps }: AppProps) {
     }
   }, [router.query.theme]); // Re-run effect when theme query param changes
 
-  return <Component {...pageProps} />;
+  return <>
+      <Head>
+        <meta name="viewport" content="width=device-width, initial-scale=2" />
+      </Head>
+      <Component {...pageProps} />;
+    </>
 }
 
 export default MyApp;
