@@ -1,5 +1,5 @@
 # NOTE
-Development of this project has continued on jp-dit-e.com (propiertary). This repository will continue to be open but will not be further developed. If you want to support me please go try JP-DIT-E.
+Development of this project has continued on [jp-dit-e.com](https://jp-dit-e.com) (propiertary). This repository will remain open but will not be further developed. If you want to support me please go try JP-DIT-E.
 
 # JP-DIT
 
